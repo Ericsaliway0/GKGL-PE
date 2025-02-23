@@ -99,13 +99,13 @@ class Network:
         return name_to_id
 
     def save_name_to_id(self):
-        file_path = 'embedding/data/emb/info/name_to_id.txt'
+        file_path = 'gat/data/emb/info/name_to_id.txt'
         with open(file_path, 'w') as f:
             for name, id in self.name_to_id.items():
                 f.write(f"{name}: {id}\n")
 
     def save_sorted_stids(self):
-        file_path = 'embedding/data/emb/info/sorted_stids.txt'
+        file_path = 'gat/data/emb/info/sorted_stids.txt'
         stids = sorted(self.pathway_info.keys())
         with open(file_path, 'w') as f:
             for stid in stids:
@@ -134,3 +134,19 @@ class Network:
                 self.graph_nx.nodes[stid]['weight'] = 0.0
             except KeyError:
                 continue
+
+    def save_to_neo4j(self):
+        # Clear the existing graph
+        self.neo4j_graph.delete_all()
+
+        # Create nodes
+        nodes = {}
+        for node_id, data in self.graph_nx.nodes(data=True):
+            node = Node("Pathway", stId=data['stId'], name=data['name'], weight=data['weight'], significance=data['significance'])
+            nodes[node_id] = node
+            self.neo4j_graph.create(node)
+
+        # Create relationships
+        for source, target in self.graph_nx.edges():
+            relationship = Relationship(nodes[source], "RELATED_TO", nodes[target])
+            self.neo4j_graph.create(relationship)

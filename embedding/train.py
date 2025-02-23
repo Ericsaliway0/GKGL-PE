@@ -28,8 +28,6 @@ from neo4j import GraphDatabase
 import torch
 import torch.nn as nn
 
-import torch
-import torch.nn as nn
 
 class FocalLoss(nn.Module):
     def __init__(self, alpha=1, gamma=2, reduction='mean'):
@@ -63,7 +61,7 @@ class FocalLoss(nn.Module):
 def train(hyperparams=None, data_path='embedding/data/emb', plot=True):
     num_epochs = hyperparams['num_epochs']
     ##feat_drop = hyperparams['feat_drop']
-    ##in_feats = hyperparams['in_feats']
+    in_feats = hyperparams['in_feats']
     out_feats = hyperparams['out_feats']
     num_layers = hyperparams['num_layers']
     num_heads = hyperparams['num_heads']
@@ -89,10 +87,10 @@ def train(hyperparams=None, data_path='embedding/data/emb', plot=True):
     dl_train = GraphDataLoader(ds_train, batch_size=batch_size, shuffle=True)
     dl_valid = GraphDataLoader(ds_valid, batch_size=batch_size, shuffle=False)
 
-    net = model.GATModel(out_feats=out_feats, num_layers=num_layers, num_heads=num_heads, do_train=True).to(device)
+    net = model.GATModel(in_feats=in_feats, out_feats=out_feats, num_layers=num_layers, num_heads=num_heads, do_train=True).to(device)
     optimizer = optim.Adam(net.parameters(), lr=learning_rate)
 
-    best_model = model.GATModel(out_feats=out_feats, num_layers=num_layers, num_heads=num_heads, do_train=True)
+    best_model = model.GATModel(in_feats=in_feats, out_feats=out_feats, num_layers=num_layers, num_heads=num_heads, do_train=True)
     best_model.load_state_dict(copy.deepcopy(net.state_dict()))
 
     loss_per_epoch_train, loss_per_epoch_valid = [], []
@@ -109,7 +107,7 @@ def train(hyperparams=None, data_path='embedding/data/emb', plot=True):
     max_f1_scores_train = []
     max_f1_scores_valid = []
     
-    results_path = 'embedding/results/node_embeddings/'
+    results_path = 'GKGL-PE/embedding_clustering/results/node_embeddings/'
     os.makedirs(results_path, exist_ok=True)
 
     all_embeddings_initial, cluster_labels_initial = calculate_cluster_labels(best_model, dl_train, device)
@@ -169,7 +167,7 @@ def train(hyperparams=None, data_path='embedding/data/emb', plot=True):
             for data in dl_train:
                 graph, name = data
                 name = name[0]
-                logits = net(graph)
+                logits = net(graph).view(-1)
                 labels = graph.ndata['significance'].unsqueeze(-1)
                 weight_ = weight[labels.data.view(-1).long()].view_as(labels)
 
@@ -203,7 +201,7 @@ def train(hyperparams=None, data_path='embedding/data/emb', plot=True):
                 for data in dl_valid:
                     graph, name = data
                     name = name[0]
-                    logits = net(graph)
+                    logits = net(graph).view(-1)
                     labels = graph.ndata['significance'].unsqueeze(-1)
                     weight_ = weight[labels.data.view(-1).long()].view_as(labels)
                     loss = criterion(logits, labels)
@@ -347,7 +345,7 @@ def train(hyperparams=None, data_path='embedding/data/emb', plot=True):
     stid_mapping = utils.get_stid_mapping(graph_train)
     
     # Save significant stIds to JSON
-    clusters_info_path = os.path.join(results_path, 'clusters_info.json')
+    '''clusters_info_path = os.path.join(results_path, 'clusters_info.json')
     with open(clusters_info_path, 'w') as f:
         json.dump(significant_stIds, f)
 
@@ -367,7 +365,7 @@ def train(hyperparams=None, data_path='embedding/data/emb', plot=True):
     clusters_node_info_path = os.path.join(results_path, 'clusters_node_info.json')
     clusters_node_info_str_keys = {str(k): v for k, v in clusters_node_info.items()}
     with open(clusters_node_info_path, 'w') as f:
-        json.dump(clusters_node_info_str_keys, f)
+        json.dump(clusters_node_info_str_keys, f)'''
 
     return model_path
 
@@ -651,7 +649,6 @@ def calculate_cluster_labels(net, dataloader, device, num_clusters=20):
     cluster_labels = kmeans.fit_predict(all_embeddings)
     return all_embeddings, cluster_labels
 
-
 def visualize_embeddings_pca(embeddings, cluster_labels, stid_list, save_path):
     pca = PCA(n_components=2)
     embeddings_2d = pca.fit_transform(embeddings)
@@ -734,7 +731,6 @@ def visualize_embeddings_pca_ori(embeddings, cluster_labels, stid_list, save_pat
     plt.savefig(save_path, bbox_inches='tight')
     plt.close()
 
-    
 def visualize_embeddings_tsne(embeddings, cluster_labels, stid_list, save_path):
     tsne = TSNE(n_components=2, perplexity=30, random_state=42)
     embeddings_2d = tsne.fit_transform(embeddings)
@@ -776,7 +772,6 @@ def visualize_embeddings_tsne(embeddings, cluster_labels, stid_list, save_path):
     plt.savefig(save_path, bbox_inches='tight')
     plt.close()
 
-
 def export_to_cytoscape(node_embeddings, cluster_labels, stid_list, output_path):
     # Create a DataFrame for Cytoscape export
     data = {
@@ -793,7 +788,6 @@ def export_to_cytoscape(node_embeddings, cluster_labels, stid_list, output_path)
     # Save to CSV for Cytoscape import
     df.to_csv(output_path, index=False)
     print(f"Data exported to {output_path} for Cytoscape visualization.")
-
 
 def draw_loss_plot(train_loss, valid_loss, save_path):
     plt.figure()
