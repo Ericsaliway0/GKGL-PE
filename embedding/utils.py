@@ -88,6 +88,7 @@ def create_network_from_markers_(marker_list, p_value, kge):
     return graph
 
 def save_to_disk(graph, save_dir):
+    print('save_dir--------------------', save_dir)
     assert os.path.isdir(save_dir), 'Directory does not exist!'
     save_path = os.path.join(save_dir, graph.kge + '.pkl')
     pickle.dump(graph.graph_nx, open(save_path, 'wb'))
@@ -99,7 +100,7 @@ def save_stid_to_csv(graph, save_dir):
     csv_path = os.path.join(save_dir, 'stId_nodes.csv')
     df.to_csv(csv_path, index=False)
 
-def create_embedding_with_markers(p_value=0.05, save=True, data_dir='gat/data/emb'):
+def create_embedding_with_markers(p_value=0.05, save=True, data_dir='embedding/data/emb'):
     emb_train = ['MS4A1', 'CD8A', 'CD4', 'KRT19', 'PCNA', 'CD68', 'PDCD1', 'PTRPC', 'KRT8', 'HER2', 'FOXP3', 'KRT5', 'H3F3A', 'H3F3B', 'RPS6', 'ESR1', 'CD44', 'KRT17', 'PDPN', 'PECAM1', 'GZMB', 'VIM', 'pAb', 'RB1', 'CD3', 'ACTA2', 'PARP1', 'H2AFX', 'CDH1', 'KRT7', 'KRT14', 'COL4A1', 'LMNA', 'H3K27', 'CD274', 'MKI67', 'PGR', 'LMNB1', 'H3K4', 'LMNB2', 'COL1A1', 'CD34', 'AR', 'HIF1A', 'FOXP3']
     emb_test = ['AKT1', 'BMP2', 'BMP4', 'MAPK1', 'MAPK3', 'BRD4', 'CASP3', 'NCAM1', 'MTOR']
     
@@ -113,7 +114,7 @@ def create_embedding_with_markers(p_value=0.05, save=True, data_dir='gat/data/em
 
     return graph_train, graph_test
 
-def create_embeddings(load_model=True, save=True, data_dir='gat/data/emb', hyperparams=None, plot=True):
+def create_embeddings(load_model=True, save=True, data_dir='embedding/data/emb', hyperparams=None, plot=True):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     data = dataset.PathwayDataset(data_dir)
     emb_dir = os.path.abspath(os.path.join(data_dir, 'embeddings'))

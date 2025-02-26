@@ -8,8 +8,8 @@ import argparse
 
 def main():
     parser = argparse.ArgumentParser(description='Create embeddings and save to disk.')
-    parser.add_argument('--data_dir', type=str, default='gat/data/emb', help='Directory to save the data.')
-    parser.add_argument('--output-file', type=str, default='gat/data/emb/embeddings.pkl', help='File to save the embeddings')
+    parser.add_argument('--data_dir', type=str, default='embedding/data/emb', help='Directory to save the data.')
+    parser.add_argument('--output-file', type=str, default='embedding/data/emb/embeddings.pkl', help='File to save the embeddings')
     parser.add_argument('--p_value', type=float, default=0.05, help='P-value threshold for creating embeddings.')
     parser.add_argument('--save', type=bool, default=True, help='Flag to save embeddings.')
     parser.add_argument('--num_epochs', type=int, default=20000, help='Number of epochs for training.')
@@ -60,5 +60,4 @@ def main():
 if __name__ == '__main__':
     main()
 
-## python gat_copy_8/gat_embedding.py --in_feats 20 --out_feats 128 --num_layers 2 --num_heads 1 --batch_size 1 --lr 0.0001 --num_epochs 1011
-## python gat/gat_embedding.py --in_feats 20 --out_feats 128 --num_layers 2 --num_heads 1 --batch_size 1 --lr 0.0001 --num_epochs 20002
+## python embedding/gat_embedding.py --in_feats 20 --out_feats 128 --num_layers 2 --num_heads 1 --batch_size 1 --lr 0.0001 --num_epochs 20002

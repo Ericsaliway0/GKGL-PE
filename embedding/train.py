@@ -72,9 +72,9 @@ def train(hyperparams=None, data_path='embedding/data/emb', plot=True):
     neo4j_user = "neo4j"
     neo4j_password = "0vZCoYqO6E9YkZRSFsdKPwHcziXu1-b0h8O9edAzWjM"
 
-    reactome_file_path = "gat/data/NCBI2Reactome.csv"
-    output_file_path = "gat/data/NCBI_pathway_map.csv"
-    gene_names_file_path = "gat/data/gene_names.csv"
+    reactome_file_path = "embedding/data/NCBI2Reactome.csv"
+    output_file_path = "embedding/data/NCBI_pathway_map.csv"
+    gene_names_file_path = "embedding/data/gene_names.csv"
     pathway_map = create_pathway_map(reactome_file_path, output_file_path)
     gene_id_to_name_mapping, gene_id_to_symbol_mapping = read_gene_names(gene_names_file_path)
     
@@ -82,8 +82,10 @@ def train(hyperparams=None, data_path='embedding/data/emb', plot=True):
     model_path = os.path.join(model_path, f'model_dim{out_feats}_lay{num_layers}_epo{num_epochs}.pth')
     
     ds = dataset.PathwayDataset(data_path)
-    ds_train = [ds[0]]
-    ds_valid = [ds[1]]
+    '''ds_train = [ds[0]]
+    ds_valid = [ds[1]]'''
+    ds_train = [ds[1]]
+    ds_valid = [ds[0]]
     dl_train = GraphDataLoader(ds_train, batch_size=batch_size, shuffle=True)
     dl_valid = GraphDataLoader(ds_valid, batch_size=batch_size, shuffle=False)
 
@@ -107,7 +109,7 @@ def train(hyperparams=None, data_path='embedding/data/emb', plot=True):
     max_f1_scores_train = []
     max_f1_scores_valid = []
     
-    results_path = 'GKGL-PE/embedding_clustering/results/node_embeddings/'
+    results_path = 'embedding//embedding_clustering/results/node_embeddings/'
     os.makedirs(results_path, exist_ok=True)
 
     all_embeddings_initial, cluster_labels_initial = calculate_cluster_labels(best_model, dl_train, device)
