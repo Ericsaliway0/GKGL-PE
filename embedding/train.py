@@ -109,7 +109,7 @@ def train(hyperparams=None, data_path='embedding/data/emb', plot=True):
     max_f1_scores_train = []
     max_f1_scores_valid = []
     
-    results_path = 'embedding//embedding_clustering/results/node_embeddings/'
+    results_path = 'embedding/results/node_embeddings/'
     os.makedirs(results_path, exist_ok=True)
 
     all_embeddings_initial, cluster_labels_initial = calculate_cluster_labels(best_model, dl_train, device)
@@ -206,13 +206,17 @@ def train(hyperparams=None, data_path='embedding/data/emb', plot=True):
                     logits = net(graph).view(-1)
                     labels = graph.ndata['significance'].unsqueeze(-1)
                     weight_ = weight[labels.data.view(-1).long()].view_as(labels)
+                    
                     loss = criterion(logits, labels)
                     loss_weighted = loss * weight_
                     loss_weighted = loss_weighted.mean()
+                    
                     loss_per_graph.append(loss_weighted.item())
                     ##preds = (logits.sigmoid() > 0.5).squeeze(1).int()
                     preds = (logits.sigmoid() > 0.5).int()
                     labels = labels.squeeze(1).int()
+                    
+                    
                     f1 = metrics.f1_score(labels, preds)
                     f1_per_graph.append(f1)
 
